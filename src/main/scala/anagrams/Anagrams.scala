@@ -122,7 +122,6 @@ object Anagrams {
     }
 
     result
-
   }
 
   /** Subtracts occurrence list `y` from occurrence list `x`.
@@ -184,13 +183,13 @@ object Anagrams {
     anagramsList = List(List())
 
     var sentCharsOcurrList = sentenceOccurrences(sentence)
-    var wordsCombList = combinations(sentCharsOcurrList)  //cada elemento aqui é uma possível palavra
+    var wordsCombList = combinations(sentCharsOcurrList)
 
     var possibleWords = List.empty[Word]
 
     for (element <- wordsCombList) {
       if (dictionaryByOccurrences.contains(element)) {
-        possibleWords  = dictionaryByOccurrences(element)
+        possibleWords  = possibleWords.union(dictionaryByOccurrences(element))
       }
     }
 
