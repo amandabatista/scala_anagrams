@@ -1,5 +1,7 @@
 package anagrams
 
+import anagrams.Anagrams.Occurrences
+
 
 object Anagrams {
 
@@ -91,22 +93,36 @@ object Anagrams {
    */
   def combinations(occurrences: Occurrences): List[Occurrences] = {
 
-    var unCharOcurrList =  List.empty[List[(Char, Int)]]
-    unCharOcurrList = List(List())
+    def productCombinations(tmpProdList: List[Occurrences], subOcurrList: List[Occurrences]): List[Occurrences] ={
+      var result = List.empty[List[(Char, Int)]]
+      result = result.union(tmpProdList)
 
-    val subOcurrList = occurrences map { case (x, y) => (1 to y).toList.map( e => (x, e))}
+      for (a_ <- subOcurrList.head) {
+        result = result :+ List(a_)
+        for (b <- tmpProdList) {
+          val p = b :+ a_
+          result = result :+ p
+        }
+      }
 
-    for ((charlist, i) <- subOcurrList.view.zipWithIndex) {
+      val nextSubOcurrList = subOcurrList.drop(1)
+      if (!nextSubOcurrList.isEmpty) {
+        result = productCombinations(result, nextSubOcurrList)
+      }
 
-      val setOfChars = charlist.map(element => List(element))
-      unCharOcurrList = unCharOcurrList.union(setOfChars)
-
-      val nextListtoProd = subOcurrList.takeRight(subOcurrList.length - i - 1).flatten
-      val tmpProdList = for (a_ <- charlist; b_ <- nextListtoProd) yield Set(a_, b_).toList
-      unCharOcurrList = unCharOcurrList.union(tmpProdList)
+      result
     }
 
-    unCharOcurrList
+    var result =  List.empty[List[(Char, Int)]]
+    result = List(List())
+
+    if (!occurrences.isEmpty) {
+      val subOcurrList = occurrences map { case (x, y) => (1 to y).toList.map( e => (x, e))}
+      result = result.union(productCombinations(List.empty[List[(Char, Int)]], subOcurrList))
+    }
+
+    result
+
   }
 
   /** Subtracts occurrence list `y` from occurrence list `x`.
@@ -163,5 +179,22 @@ object Anagrams {
    *
    *  Note: There is only one anagram of an empty sentence.
    */
-  def sentenceAnagrams(sentence: Sentence): List[Sentence] = ???
+  def sentenceAnagrams(sentence: Sentence): List[Sentence] = {
+    var anagramsList = List.empty[List[String]]
+    anagramsList = List(List())
+
+    var sentCharsOcurrList = sentenceOccurrences(sentence)
+    var wordsCombList = combinations(sentCharsOcurrList)  //cada elemento aqui é uma possível palavra
+
+    var possibleWords = List.empty[Word]
+
+    for (element <- wordsCombList) {
+      if (dictionaryByOccurrences.contains(element)) {
+        possibleWords  = dictionaryByOccurrences(element)
+      }
+    }
+
+    anagramsList = List(possibleWords)
+    anagramsList
+  }
 }
